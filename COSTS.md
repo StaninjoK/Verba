@@ -22,7 +22,7 @@ Lokale Ressourcen statt Geld: Speicherplatz (siehe unten), Strom und Rechenzeit.
 |---|---|
 | `frontend/node_modules` | ca. 490 MB |
 | `backend/.venv` (ohne Whisper) | ca. 40 MB |
-| faster-whisper + Abhängigkeiten | ca. 100 MB (Schätzung) |
+| faster-whisper + Abhängigkeiten (ctranslate2, onnxruntime, av, numpy …) | ca. 450 MB (gemessen unter Linux) |
 | Whisper-Modell `base` / `small` / `medium` / `large-v3` | ca. 145 MB / 465 MB / 1,5 GB / 3 GB |
 | Deine Aufnahmen | so groß wie die Dateien selbst |
 

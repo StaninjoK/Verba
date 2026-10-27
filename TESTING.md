@@ -49,7 +49,7 @@ Alle Testdateien (Ton, Video, kaputte und gefälschte Dateien) werden lokal mit 
 
 ## Was nicht getestet werden konnte
 
-- **Echte Transkription mit Whisper:** In der Entwicklungsumgebung war Whisper nicht installiert, und der Modell-Download (≥ 145 MB) wurde nicht ohne Freigabe durchgeführt. Der Code der Whisper-Provider ist geschrieben, aber **nicht gegen ein echtes Modell gelaufen**. Getestet ist nur, dass sie korrekt „nicht verfügbar“ melden.
+- **Echte Transkription mit Whisper:** faster-whisper wurde in der Entwicklungsumgebung installiert und wird korrekt erkannt („Modell fehlt“). Der Modell-Download war dort aber durch die Netzwerkregeln gesperrt (huggingface.co nicht erreichbar). Der Transkriptionsweg mit echtem Modell ist deshalb **noch nicht gelaufen** und muss auf dem Zielrechner getestet werden.
 - **Browser außer Chromium** (Firefox, Safari) wurden nicht automatisiert getestet.
 - **GPU-Betrieb** nicht getestet.
 - **Sehr große Dateien** (nahe 500 MB) und sehr lange Aufnahmen nur über Limits getestet, nicht mit echter Verarbeitung.

@@ -70,9 +70,12 @@ cd frontend && npm run dev                             # Web auf :3000
 
 ## Echte Transkription aktivieren (lokales Whisper)
 
+Hinweis: Ein Whisper, das „normal“ auf dem PC installiert ist (System-Python), sieht Verba nicht automatisch – Verba nutzt die eigene Umgebung `backend/.venv`. `npm run doctor` zeigt, was vorhanden ist und was zu tun ist.
+
 Ohne Whisper zeigt die App „Nur Testmodus“ und du kannst den Ablauf mit der Test-Engine ausprobieren. Für echte Transkripte:
 
-1. Engine installieren (ca. 100 MB Pakete): `backend/.venv/bin/pip install -r backend/requirements-whisper.txt`
+0. Prüfen, was schon da ist: `npm run doctor` (installiert nichts, zeigt vorhandene Whisper-Engines und Modelle)
+1. Engine installieren (ca. 450 MB Pakete, gemessen): `backend/.venv/bin/pip install -r backend/requirements-whisper.txt`
 2. Ein Modell einmalig herunterladen (z. B. `base`, ca. 145 MB)
 3. Backend neu starten – oben rechts erscheint „Lokale Engine bereit“.
 

@@ -4,7 +4,15 @@ Verba unterstützt zwei lokale Whisper-Engines. Beide laufen offline und sind ko
 
 Verba lädt **nie** automatisch Modelle herunter. Der Download ist ein bewusster, einmaliger Schritt.
 
-## 1. Engine installieren (ca. 100 MB)
+## 0. Prüfen, was schon vorhanden ist
+
+```bash
+npm run doctor
+```
+
+Zeigt, ob faster-whisper/openai-whisper in `backend/.venv` oder im System-Python installiert sind und welche Modelle schon heruntergeladen wurden (`~/.cache/whisper`, `~/.cache/huggingface/hub`, `backend/models`). Bereits vorhandene Modelle müssen nicht erneut geladen werden.
+
+## 1. Engine installieren (ca. 450 MB, gemessen unter Linux)
 
 ```bash
 backend/.venv/bin/pip install -r backend/requirements-whisper.txt

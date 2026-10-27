@@ -1,4 +1,4 @@
 # Optional local speech recognition (MIT licensed). Install only after reading
-# docs/WHISPER_SETUP.md – this pulls in ~100 MB of packages. Model weights are
+# docs/WHISPER_SETUP.md – this pulls in ~450 MB of packages. Model weights are
 # a separate, explicit download.
 faster-whisper==1.2.1
