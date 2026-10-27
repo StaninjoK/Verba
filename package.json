@@ -1,0 +1,15 @@
+{
+  "name": "verba",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Verba – local audio and video transcription",
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "dev": "node scripts/dev.mjs",
+    "start": "npm --prefix frontend run build && node scripts/dev.mjs --prod",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && .venv/bin/python -m pytest -q",
+    "test:frontend": "npm --prefix frontend run typecheck && npm --prefix frontend run lint && npm --prefix frontend test",
+    "test:e2e": "npm --prefix frontend run test:e2e"
+  }
+}
