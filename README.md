@@ -131,5 +131,5 @@ Details und die zuletzt ausgeführten Ergebnisse: [TESTING.md](TESTING.md).
 - [COSTS.md](COSTS.md) – Kosten jetzt und mögliche künftige Kosten
 - [TESTING.md](TESTING.md) – Teststrategie und Ergebnisse
 - [docs/WHISPER_SETUP.md](docs/WHISPER_SETUP.md) – Whisper und Modelle einrichten
-- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) – Plan für die Subdomain (noch nicht umgesetzt)
+- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) – Docker/Spaceship-Hyperlift-Anleitung für die Subdomain (vorbereitet, noch nicht ausgeführt)
 - [docs/ROADMAP.md](docs/ROADMAP.md) – kommerzieller Fahrplan (Stufen A–G)

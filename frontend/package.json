@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "node --test --experimental-strip-types --no-warnings src/lib/*.test.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "build:static": "VERBA_STATIC_EXPORT=1 NEXT_PUBLIC_API_URL= next build",
+    "test:e2e:hosted": "playwright test -c playwright.hosted.config.ts"
   },
   "dependencies": {
     "@fontsource-variable/inter": "5.2.8",

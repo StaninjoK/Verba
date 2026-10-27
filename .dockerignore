@@ -1,0 +1,16 @@
+.git
+**/node_modules
+**/.next
+frontend/out
+frontend/e2e/.fixtures
+frontend/e2e/.data*
+frontend/test-results
+backend/.venv
+backend/data
+backend/models
+**/__pycache__
+**/.pytest_cache
+.env
+.env.*
+*.md
+!frontend/**/*.md

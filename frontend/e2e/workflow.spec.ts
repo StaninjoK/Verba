@@ -15,7 +15,7 @@ async function uploadAndTranscribe(page: Page, file: string) {
   await engine.selectOption("mock");
   await expect(page.getByTestId("mock-hint")).toBeVisible();
   await ready.getByRole("button", { name: "Transkription starten" }).click();
-  await page.waitForURL(/\/app\/projects\/[0-9a-f]{32}$/);
+  await page.waitForURL(/\/app\/project\?id=[0-9a-f]{32}$/);
   await expect(page.getByTestId("segments")).toBeVisible({ timeout: 30_000 });
 }
 

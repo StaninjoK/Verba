@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import base64
 import hashlib
+import hmac
 import json
 import logging
 import os
@@ -31,6 +33,11 @@ LANGUAGES = [
     "sv", "da", "no", "fi", "cs", "el", "ro", "hu", "he", "id", "vi", "th", "ca", "hr", "sk", "bg", "sr",
 ]
 
+PAGE_CSP = (
+    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
+    "img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self' data:; connect-src 'self'; "
+    "frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+)
 TITLE_MAX = 200
 SEGMENT_TEXT_MAX = 10_000
 UPLOAD_CHUNK = 1024 * 1024
@@ -61,6 +68,8 @@ def api_error(status: int, code: str, message: str) -> HTTPException:
 
 def create_app(settings: Settings | None = None, registry: ProviderRegistry | None = None) -> FastAPI:
     settings = settings or Settings.from_env()
+    if settings.require_auth and not settings.auth_password:
+        raise RuntimeError("VERBA_REQUIRE_AUTH is set but VERBA_AUTH_PASSWORD is empty – refusing to start without a password.")
     settings.ensure_dirs()
     db = Database(settings.db_path)
     registry = registry or ProviderRegistry(settings)
@@ -99,9 +108,31 @@ def create_app(settings: Settings | None = None, registry: ProviderRegistry | No
         response.headers.setdefault("Referrer-Policy", "no-referrer")
         response.headers.setdefault("X-Frame-Options", "DENY")
         response.headers.setdefault("Cache-Control", "no-store")
-        if not request.url.path.startswith("/api/docs"):
+        path = request.url.path
+        if path.startswith("/api/") and not path.startswith("/api/docs"):
             response.headers.setdefault("Content-Security-Policy", "default-src 'none'; media-src 'self'; frame-ancestors 'none'")
+        elif not path.startswith("/api/"):
+            response.headers.setdefault("Content-Security-Policy", PAGE_CSP)
         return response
+
+    if settings.auth_password:
+        expected = f"{settings.auth_user}:{settings.auth_password}".encode()
+
+        @app.middleware("http")
+        async def basic_auth(request: Request, call_next):
+            # Shared-password gate for hosted use. /api/health stays open for platform health checks.
+            if request.url.path == "/api/health" or request.method == "OPTIONS":
+                return await call_next(request)
+            header = request.headers.get("authorization", "")
+            if header.lower().startswith("basic "):
+                try:
+                    supplied = base64.b64decode(header[6:].strip(), validate=True)
+                except ValueError:
+                    supplied = b""
+                if hmac.compare_digest(supplied, expected):
+                    return await call_next(request)
+            return Response(status_code=401, headers={"WWW-Authenticate": 'Basic realm="Verba", charset="UTF-8"'},
+                            content="Authentication required")
 
     @app.exception_handler(HTTPException)
     async def http_error(_: Request, exc: HTTPException):
@@ -401,5 +432,29 @@ def create_app(settings: Settings | None = None, registry: ProviderRegistry | No
     @app.get("/api/languages")
     def languages():
         return {"languages": LANGUAGES}
+
+    if settings.static_dir:
+        static_root = settings.static_dir
+
+        @app.get("/{full_path:path}", include_in_schema=False)
+        def static_files(full_path: str):
+            # Serves the exported frontend (VERBA_STATIC_EXPORT=1 build). Never escapes static_root.
+            if full_path.startswith("api/"):
+                raise api_error(404, "not_found", "Not found.")
+            clean = full_path.strip("/")
+            candidates = [clean, f"{clean}.html", f"{clean}/index.html"] if clean else ["index.html"]
+            for name in candidates:
+                target = (static_root / name).resolve()
+                if target.is_relative_to(static_root) and target.is_file():
+                    response = FileResponse(target)
+                    if clean.startswith("_next/static/"):
+                        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+                    else:
+                        response.headers["Cache-Control"] = "no-cache"
+                    return response
+            not_found = static_root / "404.html"
+            if not_found.is_file():
+                return FileResponse(not_found, status_code=404)
+            raise api_error(404, "not_found", "Not found.")
 
     return app

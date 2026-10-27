@@ -20,7 +20,9 @@ Alle Testdateien (Ton, Video, kaputte und gefälschte Dateien) werden lokal mit 
 | Frontend `eslint .` | ohne Fehler |
 | Frontend Unit-Tests (`node --test`) | **7 bestanden** |
 | Playwright E2E (Chromium Desktop + Pixel 7) | **6 bestanden** |
-| `next build` (Produktions-Build) | erfolgreich |
+| `next build` (Produktions-Build) und statischer Export | erfolgreich |
+| Hosting-Modus (`npm run test:e2e:hosted`: ein Prozess, Passwortschutz, statische Oberfläche) | **4 bestanden** |
+| Backend-Tests inkl. Passwortschutz und statischer Auslieferung | **65 bestanden** |
 | `npm audit` | 0 bekannte Schwachstellen |
 
 ## Was abgedeckt ist
@@ -53,4 +55,5 @@ Alle Testdateien (Ton, Video, kaputte und gefälschte Dateien) werden lokal mit 
 - **Browser außer Chromium** (Firefox, Safari) wurden nicht automatisiert getestet.
 - **GPU-Betrieb** nicht getestet.
 - **Sehr große Dateien** (nahe 500 MB) und sehr lange Aufnahmen nur über Limits getestet, nicht mit echter Verarbeitung.
+- **Docker-Image** wurde in der Entwicklungsumgebung nicht vollständig gebaut (Docker Hub und Debian-Paketquellen dort gesperrt bzw. limitiert).
 - **Windows/macOS**: entwickelt und getestet unter Linux.

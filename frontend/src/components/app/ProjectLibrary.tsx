@@ -163,7 +163,7 @@ export function ProjectLibrary({ refreshKey }: { refreshKey: number }) {
             const Icon = p.has_video ? FileVideoIcon : FileAudioIcon;
             return (
               <li key={p.id} className="project-row" data-testid="project-row">
-                <Link href={`/app/projects/${p.id}`} className="project-link">
+                <Link href={`/app/project?id=${p.id}`} className="project-link">
                   <span className="file-icon"><Icon size={18} /></span>
                   <span className="project-main">
                     <span className="project-title">{p.title}</span>

@@ -112,12 +112,12 @@ export function UploadPanel({ system, onUploaded }: { system: SystemInfo | null;
             <span className="alert-icon"><AlertIcon size={16} /></span>
             <span>
               {t("upload.duplicate", { title: p.duplicate_of.title })}{" "}
-              <Link className="link" href={`/app/projects/${p.duplicate_of.id}`}>{t("upload.openDuplicate")}</Link>
+              <Link className="link" href={`/app/project?id=${p.duplicate_of.id}`}>{t("upload.openDuplicate")}</Link>
             </span>
           </div>
         )}
         {system && (
-          <TranscribeOptions projectId={p.id} system={system} onStarted={() => router.push(`/app/projects/${p.id}`)} />
+          <TranscribeOptions projectId={p.id} system={system} onStarted={() => router.push(`/app/project?id=${p.id}`)} />
         )}
       </section>
     );

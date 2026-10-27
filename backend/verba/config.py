@@ -61,6 +61,10 @@ class Settings:
     cors_origins: list[str] = field(default_factory=lambda: ["http://localhost:3000", "http://127.0.0.1:3000"])
     temp_max_age_seconds: int = 3600
     start_worker: bool = True
+    static_dir: Path | None = None
+    auth_user: str = "verba"
+    auth_password: str = ""
+    require_auth: bool = False
 
     @property
     def uploads_dir(self) -> Path:
@@ -108,4 +112,8 @@ class Settings:
             allow_model_download=_bool("VERBA_ALLOW_MODEL_DOWNLOAD", False),
             cors_origins=_list("VERBA_CORS_ORIGINS", ["http://localhost:3000", "http://127.0.0.1:3000"]),
             start_worker=_bool("VERBA_START_WORKER", True),
+            static_dir=Path(os.environ["VERBA_STATIC_DIR"]).resolve() if os.environ.get("VERBA_STATIC_DIR") else None,
+            auth_user=os.environ.get("VERBA_AUTH_USER", "verba").strip() or "verba",
+            auth_password=os.environ.get("VERBA_AUTH_PASSWORD", ""),
+            require_auth=_bool("VERBA_REQUIRE_AUTH", False),
         )

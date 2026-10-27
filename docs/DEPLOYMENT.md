@@ -1,4 +1,26 @@
-# Bereitstellung auf einer Subdomain (Plan – nicht umgesetzt)
+# Bereitstellung auf einer Subdomain
+
+## Spaceship Hyperlift (vorbereitet, noch nicht ausgeführt)
+
+Das Repository enthält ein fertiges `Dockerfile`: ein einziger Container mit Backend, Weboberfläche, FFmpeg, faster-whisper und dem Modell `base`. Passwortschutz ist eingebaut und **Pflicht** – ohne `VERBA_AUTH_PASSWORD` startet der Container nicht.
+
+**Kosten:** Hyperlift wird stündlich abgerechnet, laut Spaceship ab ca. 3,60 USD/Monat; ein Profil mit 1 GB RAM (für Whisper `base` empfohlen) wird von Drittanbietern mit ca. 6,50 USD/Monat angegeben. **Vor dem Anlegen aktuellen Preis prüfen und freigeben.**
+
+Schritte im Spaceship-Konto:
+
+1. *Starlight → Hyperlift → Neue App* → GitHub verbinden → Repository `staninjok/verba`, Branch `claude/great-ritchie-s7bqiu` (oder `main` nach dem Mergen).
+2. Profil mit mindestens **1 GB RAM** wählen, Port **8080**.
+3. Umgebungsvariablen setzen:
+   - `VERBA_AUTH_PASSWORD` = ein langes, zufälliges Passwort (Benutzername ist `verba`, änderbar mit `VERBA_AUTH_USER`)
+4. Deploy starten. Der erste Build dauert einige Minuten (Modell-Download ~145 MB).
+5. *Custom Domain* → `verba.<deine-domain>` hinzufügen. Liegt die Domain bei Spaceship, wird der DNS-Eintrag dort (Advanced DNS) als CNAME auf die von Hyperlift angezeigte Adresse gesetzt.
+6. Testen: `https://verba.<deine-domain>/api/health` → `{"status":"ok"}`; die Startseite fragt nach Benutzer `verba` und dem Passwort.
+
+**Achtung Datenspeicher:** Projekte liegen im Container unter `/data`. Ob Hyperlift dauerhaften Speicher anbietet, ist ungeprüft. Ohne dauerhaften Speicher gehen Projekte bei jedem neuen Deploy verloren – für einen Testbetrieb in Ordnung, für echte Nutzung nicht.
+
+---
+
+## Allgemeiner Plan (andere Server)
 
 Gewünscht ist Verba unter einer Subdomain wie `verba.kunzsystem.<tld>`. Dieser Schritt wurde **bewusst noch nicht ausgeführt**, weil er Zugriff auf deinen Hosting-Account und deine DNS-Einstellungen braucht, Kosten verursachen kann und die App ohne Zugangsschutz für jeden im Internet offen wäre.
 

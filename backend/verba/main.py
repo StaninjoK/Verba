@@ -35,7 +35,7 @@ if __name__ == "__main__":
     uvicorn.run(
         app,
         host=os.environ.get("VERBA_HOST", "127.0.0.1"),
-        port=int(os.environ.get("VERBA_PORT", "8000")),
+        port=int(os.environ.get("VERBA_PORT") or os.environ.get("PORT") or "8000"),  # PORT: set by hosting platforms
         log_level=os.environ.get("VERBA_LOG_LEVEL", "info").lower(),
         access_log=False,
     )

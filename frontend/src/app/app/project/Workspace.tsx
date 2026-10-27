@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { AppHeader } from "@/components/app/AppHeader";
 import { RenameDialog } from "@/components/app/Dialog";
@@ -15,13 +15,11 @@ import { api, ApiError, isActive, type Project } from "@/lib/api";
 import { formatBytes, formatDuration } from "@/lib/format";
 import { errorMessage, useI18n, type MessageKey } from "@/lib/i18n";
 import { languageName, useSystem } from "@/lib/useSystem";
-import "../../../app.css";
 
 type LoadState = { kind: "loading" } | { kind: "missing" } | { kind: "error" } | { kind: "ready"; project: Project };
 
-export default function WorkspacePage() {
-  const params = useParams<{ id: string }>();
-  const id = params.id;
+export function Workspace() {
+  const id = useSearchParams().get("id") ?? "";
   const { t, locale } = useI18n();
   const toast = useToast();
   const { state: system } = useSystem();
