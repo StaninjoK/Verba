@@ -51,3 +51,23 @@ process.on("SIGTERM", () => shutdown(0));
 run("api", venvPython, ["-m", "verba.main"], path.join(root, "backend"), "35");
 run("web", "npm", ["run", process.argv.includes("--prod") ? "start" : "dev"], path.join(root, "frontend"), "36");
 console.log("\n  Verba is starting…  App: http://localhost:3000   API: http://127.0.0.1:8000/api/health\n");
+
+// --open: open the library in the default browser once the web server answers.
+if (process.argv.includes("--open")) {
+  const url = "http://localhost:3000/app";
+  const started = Date.now();
+  const tryOpen = async () => {
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        const opener = process.platform === "win32" ? ["cmd", ["/c", "start", "", url]] : process.platform === "darwin" ? ["open", [url]] : ["xdg-open", [url]];
+        spawn(opener[0], opener[1], { stdio: "ignore", detached: true }).unref();
+        return;
+      }
+    } catch {
+      // not up yet
+    }
+    if (Date.now() - started < 180_000) setTimeout(tryOpen, 1500);
+  };
+  setTimeout(tryOpen, 2000);
+}

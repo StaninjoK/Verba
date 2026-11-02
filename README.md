@@ -35,6 +35,16 @@ Verba wandelt Audio- und Videodateien in bearbeitbare Transkripte und Untertitel
 
 Alles davon ist kostenlos.
 
+## Schnellinstallation unter Windows
+
+PowerShell öffnen (Startmenü → „PowerShell“) und diesen Block einfügen:
+
+```powershell
+winget install --id Git.Git -e --silent --accept-source-agreements --accept-package-agreements; $env:Path=[Environment]::GetEnvironmentVariable("Path","Machine")+";"+[Environment]::GetEnvironmentVariable("Path","User"); git clone -b claude/great-ritchie-s7bqiu https://github.com/staninjok/verba.git "$HOME\Verba"; powershell -NoProfile -ExecutionPolicy Bypass -File "$HOME\Verba\windows\install-verba.ps1"
+```
+
+Das Skript installiert fehlende Programme (Node.js, Python, FFmpeg) kostenlos über winget, richtet Verba samt Whisper-Modell `small` ein und legt die Verknüpfung **„Verba“ auf dem Desktop** an. Danach genügt ein Doppelklick darauf.
+
 ## Installation
 
 ```bash
