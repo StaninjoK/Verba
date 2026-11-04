@@ -104,6 +104,8 @@ export interface SystemInfo {
     max_media_duration_seconds: number;
   };
   storage: { used_bytes: number; data_dir: string; orphan_files: number };
+  ocr_available?: boolean;
+  max_chat_import_bytes?: number;
   allowed_extensions: string[];
   languages: string[];
 }
@@ -150,16 +152,20 @@ export const api = {
     `${API_BASE}/api/projects/${encodeURIComponent(id)}/export?format=${format}${timestamps ? "&timestamps=true" : ""}`,
 };
 
-export interface UploadHandle {
-  promise: Promise<ProjectSummary>;
+export interface UploadHandle<T = ProjectSummary> {
+  promise: Promise<T>;
   abort: () => void;
 }
 
 /** Upload with real byte progress (fetch cannot report upload progress, XHR can). */
-export function uploadFile(file: File, onProgress: (fraction: number) => void): UploadHandle {
+export function uploadFile<T = ProjectSummary>(
+  file: File,
+  onProgress: (fraction: number) => void,
+  endpoint = "/api/projects",
+): UploadHandle<T> {
   const xhr = new XMLHttpRequest();
-  const promise = new Promise<ProjectSummary>((resolve, reject) => {
-    xhr.open("POST", `${API_BASE}/api/projects`);
+  const promise = new Promise<T>((resolve, reject) => {
+    xhr.open("POST", `${API_BASE}${endpoint}`);
     xhr.setRequestHeader("X-Verba-Filename", encodeURIComponent(file.name));
     xhr.setRequestHeader("Content-Type", "application/octet-stream");
     xhr.upload.onprogress = (e) => {
@@ -173,7 +179,7 @@ export function uploadFile(file: File, onProgress: (fraction: number) => void): 
         // non-JSON error body
       }
       if (xhr.status >= 200 && xhr.status < 300) {
-        resolve(body as ProjectSummary);
+        resolve(body as T);
       } else {
         const err = (body as { error?: ApiErrorBody } | null)?.error;
         reject(new ApiError(xhr.status, err?.code ?? "upload_failed", err?.message ?? "Upload failed"));
@@ -185,3 +191,92 @@ export function uploadFile(file: File, onProgress: (fraction: number) => void): 
   });
   return { promise, abort: () => xhr.abort() };
 }
+
+// ------------------------------------------------------------------ WhatsApp chats
+
+export type ChatStatus = "pending" | "processing" | "completed" | "failed" | "cancelled";
+export type ChatMessageKind =
+  | "text" | "voice" | "audio" | "video" | "image" | "sticker" | "document" | "omitted" | "system" | "deleted";
+
+export interface ChatStats {
+  messages: number;
+  voice_notes: number;
+  audio_items: number;
+  transcribed: number;
+  failed: number;
+  images: number;
+  images_described: number;
+  main_language: string | null;
+  languages: Record<string, number>;
+  first: string | null;
+  last: string | null;
+}
+
+export interface ChatSummary {
+  id: string;
+  title: string;
+  original_filename: string;
+  size_bytes: number;
+  participants: string[];
+  status: ChatStatus;
+  provider: string | null;
+  model: string | null;
+  language_requested: string | null;
+  is_mock: boolean;
+  total_items: number;
+  done_items: number;
+  cancel_requested: boolean;
+  attempts: number;
+  error: ApiErrorBody | null;
+  created_at: string;
+  updated_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+  stats: ChatStats | null;
+}
+
+export interface ChatMessage {
+  idx: number;
+  ts: string;
+  sender: string | null;
+  kind: ChatMessageKind;
+  text: string;
+  attachment: string | null;
+  duration_seconds: number | null;
+  transcript: string | null;
+  transcript_language: string | null;
+  item_status: "pending" | "done" | "failed" | "skipped" | null;
+  item_error: string | null;
+  image_text: string | null;
+  image_description: string | null;
+  has_media: boolean;
+}
+
+export interface Chat extends ChatSummary {
+  messages: ChatMessage[];
+}
+
+export const isChatActive = (status: ChatStatus) => status === "pending" || status === "processing";
+
+export const chatApi = {
+  list: (q?: string) =>
+    request<{ chats: ChatSummary[] }>(`/api/chats${q ? `?q=${encodeURIComponent(q)}` : ""}`).then((r) => r.chats),
+  get: (id: string) => request<Chat>(`/api/chats/${encodeURIComponent(id)}`),
+  rename: (id: string, title: string) => request<ChatSummary>(`/api/chats/${encodeURIComponent(id)}`, json("PATCH", { title })),
+  remove: (id: string) => request<void>(`/api/chats/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  cancel: (id: string) => request<ChatSummary>(`/api/chats/${encodeURIComponent(id)}/cancel`, { method: "POST" }),
+  retry: (id: string, provider: string, language: string, redoAll = false) =>
+    request<ChatSummary>(`/api/chats/${encodeURIComponent(id)}/retry`, json("POST", { provider, language, redo_all: redoAll })),
+  editMessage: (id: string, idx: number, data: { transcript?: string; image_description?: string }) =>
+    request<ChatMessage>(`/api/chats/${encodeURIComponent(id)}/messages/${idx}`, json("PATCH", data)),
+  exportUrl: (id: string, format: string, lang: string) =>
+    `${API_BASE}/api/chats/${encodeURIComponent(id)}/export?format=${format}&lang=${lang}`,
+  exportText: async (id: string, lang: string) => {
+    const res = await fetch(`${API_BASE}/api/chats/${encodeURIComponent(id)}/export?format=txt&lang=${lang}`, { cache: "no-store" });
+    if (!res.ok) throw new ApiError(res.status, "http_error", "Export failed");
+    return res.text();
+  },
+  mediaUrl: (id: string, idx: number) => `${API_BASE}/api/chats/${encodeURIComponent(id)}/media/${idx}`,
+  upload: (file: File, provider: string, language: string, onProgress: (f: number) => void) =>
+    uploadFile<ChatSummary>(file, onProgress, `/api/chats?provider=${encodeURIComponent(provider)}&language=${encodeURIComponent(language)}`),
+};

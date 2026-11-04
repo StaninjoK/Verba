@@ -87,6 +87,28 @@ $lnk.IconLocation = Join-Path $Dir "frontend\public\brand\favicon.ico"
 $lnk.Description = "Verba – Transkription"
 $lnk.Save()
 
+Step "Verba als Werkzeug in Claude Desktop eintragen"
+try {
+  $cfgDir = Join-Path $env:APPDATA "Claude"
+  $cfg = Join-Path $cfgDir "claude_desktop_config.json"
+  New-Item -ItemType Directory -Force $cfgDir | Out-Null
+  if (Test-Path $cfg) {
+    Copy-Item $cfg "$cfg.bak-verba" -Force
+    $json = Get-Content $cfg -Raw | ConvertFrom-Json
+  }
+  if (-not $json) { $json = [pscustomobject]@{} }
+  if (-not $json.PSObject.Properties["mcpServers"]) {
+    $json | Add-Member -NotePropertyName mcpServers -NotePropertyValue ([pscustomobject]@{})
+  }
+  $entry = [pscustomobject]@{ command = $venvPy; args = @((Join-Path $Dir "backend\verba_mcp.py")) }
+  $json.mcpServers | Add-Member -NotePropertyName verba -NotePropertyValue $entry -Force
+  $text = $json | ConvertTo-Json -Depth 20
+  [IO.File]::WriteAllText($cfg, $text, (New-Object Text.UTF8Encoding $false))
+  Write-Host "   eingetragen in $cfg (Claude Desktop neu starten)"
+} catch {
+  Write-Host "   Konnte Claude Desktop nicht automatisch einrichten – siehe docs\CLAUDE_TOOL.md" -ForegroundColor Yellow
+}
+
 Write-Host "`nFertig! Doppelklick auf 'Verba' auf dem Desktop startet die App im Browser." -ForegroundColor Green
 Write-Host "Das Fenster mit den Meldungen muss offen bleiben, solange du Verba benutzt."
 Read-Host "Enter drücken zum Schließen"

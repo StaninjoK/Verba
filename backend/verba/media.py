@@ -210,3 +210,56 @@ def _int(value) -> int | None:
         return int(value)
     except (TypeError, ValueError):
         return None
+
+
+# Container formats accepted for audio inside chat exports (WhatsApp uses Opus/OGG, AAC/M4A, AMR, MP4/3GP).
+CHAT_FFPROBE_FORMATS = {"ogg", "mov", "mp4", "m4a", "3gp", "3g2", "mj2", "mp3", "wav", "aac", "amr", "flac",
+                        "matroska", "webm", "avi"}
+
+
+def probe_chat_audio(path: Path) -> float:
+    """Validate an audio/video file from a chat export and return its duration in seconds."""
+    if not ffmpeg_available():
+        raise MediaError("ffmpeg_missing", "FFmpeg is not installed on this machine.")
+    cmd = ["ffprobe", "-v", "error", "-protocol_whitelist", "file", "-print_format", "json",
+           "-show_format", "-show_streams", f"file:{path}"]
+    try:
+        result = _run(cmd, PROBE_TIMEOUT_SECONDS)
+    except subprocess.TimeoutExpired as exc:
+        raise MediaError("probe_timeout", "Analysing the file took too long.") from exc
+    if result.returncode != 0:
+        raise MediaError("corrupt_file", "The file could not be read.")
+    try:
+        data = json.loads(result.stdout or b"{}")
+    except json.JSONDecodeError as exc:
+        raise MediaError("corrupt_file", "The file could not be read.") from exc
+    fmt = data.get("format") or {}
+    if not set((fmt.get("format_name") or "").split(",")) & CHAT_FFPROBE_FORMATS:
+        raise MediaError("unsupported_format", "This file type is not supported.")
+    audio = [s for s in data.get("streams") or [] if s.get("codec_type") == "audio"]
+    if not audio:
+        raise MediaError("no_audio", "The file does not contain an audio track.")
+    duration = _float(fmt.get("duration")) or _float(audio[0].get("duration"))
+    if not duration or duration <= 0:
+        raise MediaError("no_duration", "The recording length could not be determined, or the file is empty.")
+    return round(duration, 3)
+
+
+def tesseract_available() -> bool:
+    return shutil.which("tesseract") is not None
+
+
+def ocr_image(path: Path, languages: str = "deu+eng+spa", timeout: int = 60) -> str | None:
+    """Text visible in an image via the local Tesseract OCR program, if installed. Never uploads anything."""
+    if not tesseract_available():
+        return None
+    try:
+        result = subprocess.run(["tesseract", str(path), "stdout", "-l", languages], capture_output=True,
+                                timeout=timeout, check=False, stdin=subprocess.DEVNULL)
+        if result.returncode != 0:  # requested language packs missing – retry with the default
+            result = subprocess.run(["tesseract", str(path), "stdout"], capture_output=True, timeout=timeout,
+                                    check=False, stdin=subprocess.DEVNULL)
+    except (subprocess.TimeoutExpired, OSError):
+        return None
+    text = " ".join(result.stdout.decode("utf-8", errors="replace").split())
+    return text or None

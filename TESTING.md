@@ -11,18 +11,17 @@ npm run test:e2e     # Playwright: startet Backend + Frontend, falls nicht laufe
 
 Alle Testdateien (Ton, Video, kaputte und gefälschte Dateien) werden lokal mit FFmpeg erzeugt. Es werden keine Aufnahmen heruntergeladen oder hochgeladen.
 
-## Ergebnisse (zuletzt ausgeführt am 27.10.2026)
+## Ergebnisse (zuletzt ausgeführt am 04.11.2026)
 
 | Suite | Ergebnis |
 |---|---|
-| Backend `pytest` | **62 bestanden**, 0 fehlgeschlagen |
+| Backend `pytest` (inkl. WhatsApp-Import, MCP-Server, CLI) | **82 bestanden**, 0 fehlgeschlagen |
 | Frontend `tsc --noEmit` | ohne Fehler |
 | Frontend `eslint .` | ohne Fehler |
 | Frontend Unit-Tests (`node --test`) | **7 bestanden** |
-| Playwright E2E (Chromium Desktop + Pixel 7) | **6 bestanden** |
+| Playwright E2E (Chromium Desktop + Pixel 7, inkl. WhatsApp-Chat) | **7 bestanden** |
 | `next build` (Produktions-Build) und statischer Export | erfolgreich |
-| Hosting-Modus (`npm run test:e2e:hosted`: ein Prozess, Passwortschutz, statische Oberfläche) | **4 bestanden** |
-| Backend-Tests inkl. Passwortschutz und statischer Auslieferung | **65 bestanden** |
+| Hosting-Modus (`npm run test:e2e:hosted`: ein Prozess, Passwortschutz, statische Oberfläche, inkl. WhatsApp-Chat) | **5 bestanden** |
 | `npm audit` | 0 bekannte Schwachstellen |
 
 ## Was abgedeckt ist
@@ -48,6 +47,13 @@ Alle Testdateien (Ton, Video, kaputte und gefälschte Dateien) werden lokal mit 
 | Sicherheits-Header, CORS, Logs ohne Inhalte | `test_security_headers_and_cors`, `test_logs_do_not_contain_transcript_or_filename` |
 | Medienwiedergabe mit Range-Requests | `test_media_is_served_with_range_support` |
 | Mobile ohne horizontales Scrollen | E2E `responsive.spec.ts` |
+| WhatsApp-Parser (Android/iOS, DE/ES/EN, AM/PM, mehrzeilig, gelöscht, Medien ausgeschlossen) | `test_whatsapp.py::test_android_german`, `test_ios_spanish_with_invisible_marks`, `test_us_dates_with_am_pm` |
+| Sicheres Entpacken (Pfad-Tricks, Größenlimit, ZIP ohne Chat) | `test_import_zip_copies_media_safely`, `test_import_rejects_oversized_archive`, `test_import_rejects_zip_without_chat` |
+| Chat-Verarbeitung, Export TXT/MD/DOCX/JSON, Bearbeiten, Löschen, Suche | `test_chat_import_transcribe_and_export`, `test_chat_text_only_export` |
+| Fehler, Wiederholen, Abbrechen, Wiederanlauf | `test_chat_failure_and_retry`, `test_chat_cancel_and_recovery` |
+| Sprach-Rückfall bei unsicherer Erkennung | `test_low_confidence_language_falls_back_to_chat_language` |
+| MCP-Protokoll und alle Werkzeuge gegen echtes HTTP-Backend, CLI | `test_mcp.py` |
+| Chat im Browser: Import → Transkription → Bildbeschreibung → Textblock → Download | E2E `chat.spec.ts` |
 
 ## Was nicht getestet werden konnte
 

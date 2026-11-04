@@ -20,6 +20,8 @@ from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from pydantic import BaseModel, Field
 
 from . import exports, media, storage
+from .chats import ChatManager
+from .chats_api import register_chat_routes
 from .config import Settings
 from .db import ACTIVE_STATUSES, Database, DuplicateJob, VersionConflict
 from .jobs import JobManager
@@ -74,15 +76,18 @@ def create_app(settings: Settings | None = None, registry: ProviderRegistry | No
     db = Database(settings.db_path)
     registry = registry or ProviderRegistry(settings)
     jobs = JobManager(settings, db, registry)
+    chats = ChatManager(settings, db, registry)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         if settings.start_worker:
             jobs.start()
+            chats.start()
         orphans = storage.find_orphan_uploads(settings.uploads_dir, db.stored_filenames())
         if orphans:
             log.warning("%d upload file(s) have no project record; see /api/system", len(orphans))
         yield
+        chats.stop()
         jobs.stop()
 
     app = FastAPI(title="Verba API", version="0.1.0", lifespan=lifespan, docs_url="/api/docs", openapi_url="/api/openapi.json",
@@ -90,6 +95,7 @@ def create_app(settings: Settings | None = None, registry: ProviderRegistry | No
     app.state.settings = settings
     app.state.db = db
     app.state.jobs = jobs
+    app.state.chats = chats
     app.state.registry = registry
 
     app.add_middleware(
@@ -214,7 +220,7 @@ def create_app(settings: Settings | None = None, registry: ProviderRegistry | No
 
     @app.get("/api/system")
     def system():
-        used = storage.directory_size(settings.uploads_dir)
+        used = storage.directory_size(settings.uploads_dir) + storage.directory_size(settings.data_dir / "chats")
         orphans = storage.find_orphan_uploads(settings.uploads_dir, db.stored_filenames())
         providers = registry.describe()
         real_ready = any(p["available"] and p["kind"] == "local" for p in providers)
@@ -234,6 +240,8 @@ def create_app(settings: Settings | None = None, registry: ProviderRegistry | No
             },
             "storage": {"used_bytes": used, "data_dir": str(settings.data_dir), "orphan_files": len(orphans)},
             "allowed_extensions": sorted(media.EXTENSION_FAMILIES),
+            "ocr_available": media.tesseract_available(),
+            "max_chat_import_bytes": settings.max_chat_import_mb * 1024 * 1024,
             "languages": LANGUAGES,
         }
 
@@ -432,6 +440,8 @@ def create_app(settings: Settings | None = None, registry: ProviderRegistry | No
     @app.get("/api/languages")
     def languages():
         return {"languages": LANGUAGES}
+
+    register_chat_routes(app, settings, db, registry, chats, LANGUAGES)
 
     if settings.static_dir:
         static_root = settings.static_dir

@@ -190,9 +190,10 @@ class JobManager:
                 self.db.set_job_progress(job_id, None if value is None else max(0.0, min(1.0, float(value))))
 
             try:
-                result = provider.transcribe(wav_path, language=job["language_requested"],
-                                             duration_seconds=info.duration_seconds,
-                                             on_progress=on_progress, should_cancel=should_cancel)
+                with self.registry.engine_slots:
+                    result = provider.transcribe(wav_path, language=job["language_requested"],
+                                                 duration_seconds=info.duration_seconds,
+                                                 on_progress=on_progress, should_cancel=should_cancel)
             except Cancelled:
                 if state["timed_out"]:
                     raise JobTimeout()

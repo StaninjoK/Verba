@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import threading
+
 from ..config import Settings
 from .base import (  # noqa: F401
     Cancelled,
@@ -31,6 +33,8 @@ class ProviderRegistry:
                 ExternalAPIProvider(settings),
             ]
         self._providers = {p.name: p for p in providers}
+        # Caps how many transcriptions run at once across single files and chat imports (CPU/RAM bound).
+        self.engine_slots = threading.BoundedSemaphore(max(1, settings.max_concurrent_jobs))
 
     def allowed(self, name: str) -> bool:
         provider = self._providers.get(name)

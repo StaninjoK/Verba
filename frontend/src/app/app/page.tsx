@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { AppHeader } from "@/components/app/AppHeader";
+import { ChatImportPanel } from "@/components/app/ChatImportPanel";
+import { ChatList } from "@/components/app/ChatList";
 import { ProjectLibrary } from "@/components/app/ProjectLibrary";
 import { UploadPanel } from "@/components/app/UploadPanel";
 import { AlertIcon, ShieldIcon } from "@/components/Icons";
@@ -14,6 +16,7 @@ export default function Dashboard() {
   const { t, locale } = useI18n();
   const { state, refresh } = useSystem();
   const [refreshKey, setRefreshKey] = useState(0);
+  const [tab, setTab] = useState<"media" | "chat">("media");
   const info = state.kind === "ready" ? state.info : null;
   const noRealEngine = info && !info.real_engine_available;
 
@@ -42,7 +45,18 @@ export default function Dashboard() {
 
         <div className="dash-grid">
           <div className="dash-main">
-            <UploadPanel system={info} onUploaded={() => setRefreshKey((n) => n + 1)} />
+            <div className="segmented dash-tabs" role="tablist" aria-label={t("dash.title")}>
+              <button type="button" role="tab" aria-selected={tab === "media"} className={tab === "media" ? "is-active" : ""}
+                onClick={() => setTab("media")}>{t("dash.tabMedia")}</button>
+              <button type="button" role="tab" aria-selected={tab === "chat"} className={tab === "chat" ? "is-active" : ""}
+                onClick={() => setTab("chat")} data-testid="tab-chat">💬 {t("dash.tabChat")}</button>
+            </div>
+            {tab === "media" ? (
+              <UploadPanel system={info} onUploaded={() => setRefreshKey((n) => n + 1)} />
+            ) : (
+              <ChatImportPanel system={info} />
+            )}
+            <ChatList refreshKey={refreshKey} />
             <ProjectLibrary refreshKey={refreshKey} />
           </div>
           <aside className="dash-side">

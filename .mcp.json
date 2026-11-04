@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "verba": {
+      "command": "backend/.venv/bin/python",
+      "args": ["backend/verba_mcp.py"]
+    }
+  }
+}

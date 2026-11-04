@@ -21,6 +21,10 @@ Verba wandelt Audio- und Videodateien in bearbeitbare Transkripte und Untertitel
 | Export: TXT, TXT mit Zeitstempeln, SRT, VTT, DOCX, JSON | ✅ fertig |
 | Bibliothek: öffnen, umbenennen, durchsuchen (Titel + Transkripttext), löschen | ✅ fertig |
 | Oberfläche in Deutsch, Englisch, Spanisch | ✅ fertig |
+| **WhatsApp-Chats**: ZIP-Export importieren, alle Sprachnachrichten/Videos transkribieren, ganzer Chat als Textblock mit Datum/Uhrzeit/Absender (TXT, Markdown, Word, JSON) | ✅ fertig ([Anleitung](docs/CLAUDE_TOOL.md)) |
+| Sprache pro Chat festlegen oder automatisch je Sprachnachricht erkennen (mit Rückfall auf die Hauptsprache bei Unsicherheit) | ✅ fertig |
+| Bilder im Chat: Text im Bild per Tesseract (optional), Beschreibung durch Claude oder von Hand | ✅ fertig |
+| **Claude-Werkzeug (MCP-Server)** und Kommandozeile `python -m verba.cli` | ✅ fertig |
 | Benutzerkonten, Cloud-Speicher, Bezahlung, öffentliches Hosting | ❌ bewusst nicht enthalten |
 | Cloud-Transkriptions-API | ❌ nur deaktivierter Platzhalter, sendet nichts |
 
@@ -141,5 +145,6 @@ Details und die zuletzt ausgeführten Ergebnisse: [TESTING.md](TESTING.md).
 - [COSTS.md](COSTS.md) – Kosten jetzt und mögliche künftige Kosten
 - [TESTING.md](TESTING.md) – Teststrategie und Ergebnisse
 - [docs/WHISPER_SETUP.md](docs/WHISPER_SETUP.md) – Whisper und Modelle einrichten
+- [docs/CLAUDE_TOOL.md](docs/CLAUDE_TOOL.md) – WhatsApp-Chats transkribieren und Verba als Werkzeug für Claude
 - [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) – Docker/Spaceship-Hyperlift-Anleitung für die Subdomain (vorbereitet, noch nicht ausgeführt)
 - [docs/ROADMAP.md](docs/ROADMAP.md) – kommerzieller Fahrplan (Stufen A–G)

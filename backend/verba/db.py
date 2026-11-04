@@ -60,6 +60,51 @@ CREATE TABLE IF NOT EXISTS jobs (
 CREATE INDEX IF NOT EXISTS idx_jobs_project ON jobs(project_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status, created_at);
 CREATE INDEX IF NOT EXISTS idx_projects_sha ON projects(sha256);
+
+CREATE TABLE IF NOT EXISTS chats (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    original_filename TEXT NOT NULL,
+    size_bytes INTEGER NOT NULL,
+    participants TEXT NOT NULL DEFAULT '[]',
+    date_order TEXT NOT NULL,
+    status TEXT NOT NULL,
+    provider TEXT,
+    model TEXT,
+    language_requested TEXT,
+    is_mock INTEGER NOT NULL DEFAULT 0,
+    total_items INTEGER NOT NULL DEFAULT 0,
+    done_items INTEGER NOT NULL DEFAULT 0,
+    attempts INTEGER NOT NULL DEFAULT 0,
+    cancel_requested INTEGER NOT NULL DEFAULT 0,
+    error_code TEXT,
+    error_message TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    started_at TEXT,
+    finished_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS chat_messages (
+    chat_id TEXT NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
+    idx INTEGER NOT NULL,
+    ts TEXT NOT NULL,
+    sender TEXT,
+    kind TEXT NOT NULL,
+    text TEXT NOT NULL DEFAULT '',
+    attachment TEXT,
+    stored_name TEXT,
+    duration_seconds REAL,
+    transcript TEXT,
+    transcript_language TEXT,
+    item_status TEXT,
+    item_error TEXT,
+    image_text TEXT,
+    image_description TEXT,
+    PRIMARY KEY (chat_id, idx)
+);
+
+CREATE INDEX IF NOT EXISTS idx_chats_status ON chats(status, created_at);
 """
 
 ACTIVE_STATUSES = ("pending", "validating", "processing")

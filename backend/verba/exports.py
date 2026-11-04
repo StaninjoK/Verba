@@ -70,7 +70,7 @@ def to_vtt(segments: list[dict]) -> str:
 
 def to_docx(title: str, segments: list[dict], with_timestamps: bool = True) -> bytes:
     """Minimal standards-compliant DOCX built with the standard library only."""
-    paragraphs = [f'<w:p><w:pPr><w:pStyle w:val="Title"/></w:pPr><w:r><w:t xml:space="preserve">{escape(title)}</w:t></w:r></w:p>']
+    paragraphs = [_title_paragraph(title)]
     for seg in _timed(segments):
         runs = ""
         if with_timestamps:
@@ -78,6 +78,30 @@ def to_docx(title: str, segments: list[dict], with_timestamps: bool = True) -> b
                      f'<w:t xml:space="preserve">[{format_clock(seg["start"])}] </w:t></w:r>')
         runs += f'<w:r><w:t xml:space="preserve">{escape(seg["text"])}</w:t></w:r>'
         paragraphs.append(f"<w:p>{runs}</w:p>")
+    return _docx_package(paragraphs)
+
+
+def _title_paragraph(title: str) -> str:
+    return f'<w:p><w:pPr><w:pStyle w:val="Title"/></w:pPr><w:r><w:t xml:space="preserve">{escape(title)}</w:t></w:r></w:p>'
+
+
+def _xml_text(text: str) -> str:
+    # strip characters XML 1.0 forbids (control chars can appear in chat exports)
+    return escape("".join(ch for ch in text if ch in "\t\n" or ord(ch) >= 0x20))
+
+
+def docx_from_lines(title: str, lines: list[tuple[str, bool]]) -> bytes:
+    """DOCX with one paragraph per line; headings are bold. Line breaks inside a line are kept."""
+    paragraphs = [_title_paragraph(title)]
+    for text, heading in lines:
+        parts = _xml_text(text).split("\n")
+        rpr = "<w:rPr><w:b/></w:rPr>" if heading else ""
+        body = '<w:br/>'.join(f'<w:t xml:space="preserve">{p}</w:t>' for p in parts)
+        paragraphs.append(f"<w:p><w:r>{rpr}{body}</w:r></w:p>")
+    return _docx_package(paragraphs)
+
+
+def _docx_package(paragraphs: list[str]) -> bytes:
 
     document = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'

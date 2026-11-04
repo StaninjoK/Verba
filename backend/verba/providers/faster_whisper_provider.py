@@ -132,4 +132,5 @@ class FasterWhisperProvider(TranscriptionProvider):
             language=getattr(info, "language", None) or language,
             provider=self.name,
             model=self.settings.whisper_model,
+            language_probability=None if language else getattr(info, "language_probability", None),
         )

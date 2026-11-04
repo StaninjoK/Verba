@@ -33,6 +33,7 @@ class TranscriptionResult:
     provider: str
     model: str | None
     is_mock: bool = False
+    language_probability: float | None = None  # engine's confidence in an auto-detected language
 
 
 @dataclass

@@ -43,6 +43,7 @@ ALLOWED_EXTENSIONS = (".mp3", ".wav", ".m4a", ".mp4", ".ogg", ".oga", ".opus", "
 class Settings:
     data_dir: Path
     max_upload_mb: int = 500
+    max_chat_import_mb: int = 2000
     max_storage_mb: int = 10_000
     max_concurrent_jobs: int = 1
     max_media_duration_min: int = 240
@@ -97,6 +98,7 @@ class Settings:
         return cls(
             data_dir=data_dir,
             max_upload_mb=_int("VERBA_MAX_UPLOAD_MB", 500, 1),
+            max_chat_import_mb=_int("VERBA_MAX_CHAT_IMPORT_MB", 2000, 1),
             max_storage_mb=_int("VERBA_MAX_STORAGE_MB", 10_000, 1),
             max_concurrent_jobs=_int("VERBA_MAX_CONCURRENT_JOBS", 1, 1),
             max_media_duration_min=_int("VERBA_MAX_MEDIA_DURATION_MIN", 240, 1),
