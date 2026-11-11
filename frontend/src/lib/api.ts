@@ -280,3 +280,20 @@ export const chatApi = {
   upload: (file: File, provider: string, language: string, onProgress: (f: number) => void) =>
     uploadFile<ChatSummary>(file, onProgress, `/api/chats?provider=${encodeURIComponent(provider)}&language=${encodeURIComponent(language)}`),
 };
+
+// ------------------------------------------------------------------ speech recognition setup
+
+export interface WhisperSetupStatus {
+  status: "idle" | "running" | "done" | "failed";
+  step: "packages" | "model" | "config" | null;
+  model: string | null;
+  error: string | null;
+  models: Record<string, number>;
+  packages_mb: number;
+  installed: boolean;
+}
+
+export const setupApi = {
+  status: () => request<WhisperSetupStatus>("/api/setup/whisper"),
+  start: (model: string) => request<WhisperSetupStatus>("/api/setup/whisper", json("POST", { model })),
+};

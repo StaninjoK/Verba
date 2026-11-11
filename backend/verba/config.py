@@ -66,6 +66,7 @@ class Settings:
     auth_user: str = "verba"
     auth_password: str = ""
     require_auth: bool = False
+    allow_self_setup: bool = True
 
     @property
     def uploads_dir(self) -> Path:
@@ -118,4 +119,5 @@ class Settings:
             auth_user=os.environ.get("VERBA_AUTH_USER", "verba").strip() or "verba",
             auth_password=os.environ.get("VERBA_AUTH_PASSWORD", ""),
             require_auth=_bool("VERBA_REQUIRE_AUTH", False),
+            allow_self_setup=_bool("VERBA_ALLOW_SELF_SETUP", True),
         )

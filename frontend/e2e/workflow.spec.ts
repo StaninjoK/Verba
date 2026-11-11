@@ -106,3 +106,14 @@ test("invalid files are rejected with a clear message", async ({ page }) => {
   await page.getByTestId("file-input").setInputFiles(exe);
   await expect(page.getByTestId("upload-error")).toContainText("nicht unterstützt");
 });
+
+test("without a real engine: setup card is shown and the test engine is never used silently", async ({ page }) => {
+  await page.goto("/app");
+  await expect(page.getByTestId("whisper-setup")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Jetzt einrichten" })).toBeVisible();
+  await page.getByTestId("file-input").setInputFiles(path.join(fixtures, "e2e-tone.wav"));
+  const ready = page.getByTestId("upload-ready");
+  await expect(ready.getByLabel("Engine")).toHaveValue("auto");
+  await ready.getByRole("button", { name: "Transkription starten" }).click();
+  await expect(ready.getByRole("alert")).toContainText("keine lokale Transkriptions-Engine");
+});

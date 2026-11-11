@@ -130,7 +130,7 @@ export function Workspace() {
             {project.is_mock && project.has_transcript && (
               <div className="alert alert-warning mock-banner" role="note" data-testid="mock-banner">
                 <span className="alert-icon"><AlertIcon size={16} /></span>
-                <span><strong>{t("ws.mockTitle")}.</strong> {t("ws.mockBody")}</span>
+                <span><strong>{t("ws.mockTitle")}.</strong> {t("ws.mockBody")}{" "}<Link className="link" href="/app#setup">{t("setup.cta")}</Link></span>
               </div>
             )}
 

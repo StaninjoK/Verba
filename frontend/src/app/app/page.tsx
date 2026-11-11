@@ -6,6 +6,7 @@ import { ChatImportPanel } from "@/components/app/ChatImportPanel";
 import { ChatList } from "@/components/app/ChatList";
 import { ProjectLibrary } from "@/components/app/ProjectLibrary";
 import { UploadPanel } from "@/components/app/UploadPanel";
+import { WhisperSetupCard } from "@/components/app/WhisperSetupCard";
 import { AlertIcon, ShieldIcon } from "@/components/Icons";
 import { formatBytes } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
@@ -36,12 +37,7 @@ export default function Dashboard() {
             <button type="button" className="btn btn-sm" onClick={refresh}>{t("common.retry")}</button>
           </div>
         )}
-        {noRealEngine && (
-          <div className="alert alert-warning" data-testid="no-engine">
-            <span className="alert-icon"><AlertIcon size={16} /></span>
-            <span><strong>{t("engine.noneTitle")}.</strong> {t("engine.noneBody")}</span>
-          </div>
-        )}
+        {noRealEngine && <WhisperSetupCard onReady={refresh} />}
 
         <div className="dash-grid">
           <div className="dash-main">

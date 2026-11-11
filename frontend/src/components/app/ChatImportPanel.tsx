@@ -33,7 +33,7 @@ export function ChatImportPanel({ system }: { system: SystemInfo | null }) {
   const realAvailable = system?.providers.some((p) => p.kind === "local" && p.available) ?? false;
   const selectable = system?.providers.filter((p) => p.allowed && p.kind !== "external") ?? [];
   const [provider, setProvider] = useState<string | null>(null);
-  const engine = provider ?? (realAvailable ? "auto" : (selectable.find((p) => p.is_mock && p.available)?.name ?? "auto"));
+  const engine = provider ?? "auto"; // the test engine is never preselected
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const handleRef = useRef<UploadHandle<ChatSummary> | null>(null);
@@ -145,7 +145,7 @@ export function ChatImportPanel({ system }: { system: SystemInfo | null }) {
             <div>
               <label className="label" htmlFor="chat-engine">{t("opts.engine")}</label>
               <select id="chat-engine" className="select" value={engine} onChange={(e) => setProvider(e.target.value)}>
-                {realAvailable && <option value="auto">{t("engine.auto")}</option>}
+                <option value="auto">{realAvailable ? t("engine.auto") : t("engine.autoNone")}</option>
                 {selectable.map((p) => (
                   <option key={p.name} value={p.name} disabled={!p.available}>
                     {t(`provider.${p.name}` as MessageKey)}

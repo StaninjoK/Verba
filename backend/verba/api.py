@@ -23,6 +23,7 @@ from . import exports, media, storage
 from .chats import ChatManager
 from .chats_api import register_chat_routes
 from .config import Settings
+from .setup_whisper import WhisperSetup
 from .db import ACTIVE_STATUSES, Database, DuplicateJob, VersionConflict
 from .jobs import JobManager
 from .providers import ProviderError, ProviderRegistry
@@ -59,6 +60,10 @@ class SegmentEdit(BaseModel):
     text: str = Field(max_length=SEGMENT_TEXT_MAX)
 
 
+class SetupBody(BaseModel):
+    model: str = Field(default="small", max_length=20)
+
+
 class TranscriptBody(BaseModel):
     version: int
     segments: list[SegmentEdit]
@@ -77,6 +82,7 @@ def create_app(settings: Settings | None = None, registry: ProviderRegistry | No
     registry = registry or ProviderRegistry(settings)
     jobs = JobManager(settings, db, registry)
     chats = ChatManager(settings, db, registry)
+    whisper_setup = WhisperSetup(settings)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -96,6 +102,7 @@ def create_app(settings: Settings | None = None, registry: ProviderRegistry | No
     app.state.db = db
     app.state.jobs = jobs
     app.state.chats = chats
+    app.state.whisper_setup = whisper_setup
     app.state.registry = registry
 
     app.add_middleware(
@@ -440,6 +447,19 @@ def create_app(settings: Settings | None = None, registry: ProviderRegistry | No
     @app.get("/api/languages")
     def languages():
         return {"languages": LANGUAGES}
+
+    @app.get("/api/setup/whisper")
+    def setup_status():
+        return whisper_setup.status()
+
+    @app.post("/api/setup/whisper", status_code=202)
+    def setup_start(body: SetupBody):
+        if not settings.allow_self_setup:
+            raise api_error(403, "setup_disabled", "Installing components from the app is disabled here.")
+        try:
+            return whisper_setup.start(body.model)
+        except ValueError:
+            raise api_error(422, "invalid_model", "Unknown model.")
 
     register_chat_routes(app, settings, db, registry, chats, LANGUAGES)
 

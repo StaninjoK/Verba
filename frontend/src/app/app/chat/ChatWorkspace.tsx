@@ -255,7 +255,7 @@ export function ChatWorkspace() {
             {chat.is_mock && (
               <div className="alert alert-warning" role="note" data-testid="mock-banner">
                 <span className="alert-icon"><AlertIcon size={16} /></span>
-                <span><strong>{t("ws.mockTitle")}.</strong> {t("ws.mockBody")}</span>
+                <span><strong>{t("ws.mockTitle")}.</strong> {t("ws.mockBody")}{" "}<Link className="link" href="/app#setup">{t("setup.cta")}</Link></span>
               </div>
             )}
 

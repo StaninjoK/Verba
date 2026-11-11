@@ -22,7 +22,7 @@ export function TranscribeOptions({
   const realAvailable = system.providers.some((p) => p.kind === "local" && p.available);
   const selectable = system.providers.filter((p) => p.allowed && p.kind !== "external");
   const [language, setLanguage] = useState("auto");
-  const [provider, setProvider] = useState(realAvailable ? "auto" : (selectable.find((p) => p.is_mock && p.available)?.name ?? "auto"));
+  const [provider, setProvider] = useState("auto"); // the test engine is never preselected
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,7 +64,7 @@ export function TranscribeOptions({
         <div>
           <label className="label" htmlFor={`engine-${projectId}`}>{t("opts.engine")}</label>
           <select id={`engine-${projectId}`} className="select" value={provider} onChange={(e) => setProvider(e.target.value)}>
-            {realAvailable && <option value="auto">{t("engine.auto")}</option>}
+            <option value="auto">{realAvailable ? t("engine.auto") : t("engine.autoNone")}</option>
             {selectable.map((p) => (
               <option key={p.name} value={p.name} disabled={!p.available}>
                 {t(`provider.${p.name}` as MessageKey)}

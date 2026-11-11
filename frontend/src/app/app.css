@@ -1271,3 +1271,61 @@ label.btn.is-disabled {
   font-size: 13px;
   color: var(--text-3);
 }
+
+/* Speech recognition setup */
+.setup-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  background:
+    radial-gradient(120% 140% at 0% 0%, var(--accent-soft), transparent 60%),
+    var(--surface);
+}
+
+.setup-head {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.setup-head h2 {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.setup-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: var(--ink-contrast);
+}
+
+.setup-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.setup-model {
+  flex: 1 1 260px;
+}
+
+.setup-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.setup-error {
+  display: block;
+  margin-top: 6px;
+  white-space: pre-wrap;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
